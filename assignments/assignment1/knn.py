@@ -52,10 +52,14 @@ class KNN:
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
+        # print(X[1])
+
         for i_test in range(num_test):
             for i_train in range(num_train):
                 # TODO: Fill dists[i_test][i_train]
-                pass
+                dists[i_test][i_train] = np.sum(np.abs(X[i_test]-self.train_X[i_train]))
+                # pass
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -75,7 +79,9 @@ class KNN:
         for i_test in range(num_test):
             # TODO: Fill the whole row of dists[i_test]
             # without additional loops or list comprehensions
-            pass
+            dists[i_test] = np.sum(np.abs(self.train_X - X[i_test]), axis=1)
+            # pass
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
@@ -94,7 +100,8 @@ class KNN:
         # Using float32 to to save memory - the default is float64
         dists = np.zeros((num_test, num_train), np.float32)
         # TODO: Implement computing all distances with no loops!
-        pass
+        dists = np.sum(np.abs(X[:, np.newaxis] - self.train_X), axis=2)
+        return dists
 
     def predict_labels_binary(self, dists):
         '''
@@ -113,7 +120,16 @@ class KNN:
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            pass
+
+            '''
+            1) Сортируем массив по индексам, берем k первых
+            2) Смотрим на массив ответов self.train_y и берем нужные из них
+            3) Считаем количество каждого и берем самый нужный
+            '''
+            cur_nn = dists[i].argsort()[:self.k] 
+            possible_preds = self.train_y[cur_nn]
+            pred[i] = np.bincount(possible_preds).argmax()
+
         return pred
 
     def predict_labels_multiclass(self, dists):
@@ -129,10 +145,18 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
-        pred = np.zeros(num_test, np.int)
+        pred = np.zeros(num_test, np.int16)
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            pass
+
+            '''
+            1) Сортируем массив по индексам, берем k первых
+            2) Смотрим на массив ответов self.train_y и берем нужные из них
+            3) Считаем количество каждого и берем самый нужный
+            '''
+            cur_nn = dists[i].argsort()[:self.k] 
+            possible_preds = self.train_y[cur_nn]
+            pred[i] = np.bincount(possible_preds).argmax()
+
         return pred
